@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Table(name = "comments")
+@Table(name = "comment")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommentEntity {
     @Id

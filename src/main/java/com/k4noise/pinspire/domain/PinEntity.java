@@ -9,7 +9,7 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "pins")
+@Table(name = "pin")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PinEntity {
     @Id

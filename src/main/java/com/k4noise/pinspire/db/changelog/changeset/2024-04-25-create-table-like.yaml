@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-like-table
+      author: k4noise
+      changes:
+        - createTable:
+            tableName: like
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+              - column:
+                  name: pin_id
+                  type: bigint
+
+      rollback:
+          - dropTable:
+              tableName: like

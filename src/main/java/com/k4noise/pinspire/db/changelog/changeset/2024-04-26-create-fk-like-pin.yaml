@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-like-pin-foreign-key
+      author: k4noise
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: likes
+            baseColumnNames: pin_id
+            constraintName: fk_like_pin
+            referencedTableName: pin
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+      rollback:
+        - dropForeignKeyConstraint:
+            baseTableName: likes
+            constraintName: fk_like_pin

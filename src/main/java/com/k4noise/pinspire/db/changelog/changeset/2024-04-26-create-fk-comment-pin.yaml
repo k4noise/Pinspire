@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-comment-pin-foreign-key
+      author: k4noise
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: comment
+            baseColumnNames: pin_id
+            constraintName: fk_comment_pin
+            referencedTableName: pin
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+      rollback:
+        - dropForeignKeyConstraint:
+            baseTableName: comment
+            constraintName: fk_comment_pin

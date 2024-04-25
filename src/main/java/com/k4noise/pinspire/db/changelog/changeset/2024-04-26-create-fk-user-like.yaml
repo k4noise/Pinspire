@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-like-user-foreign-key
+      author: k4noise
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: likes
+            baseColumnNames: user_id
+            constraintName: fk_like_user
+            referencedTableName: user
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+      rollback:
+        - dropForeignKeyConstraint:
+            baseTableName: likes

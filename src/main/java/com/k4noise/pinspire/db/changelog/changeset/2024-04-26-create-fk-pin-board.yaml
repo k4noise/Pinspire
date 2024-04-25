@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-pin-board-foreign-key
+      author: k4noise
+      changes:
+          - addForeignKeyConstraint:
+                baseTableName: pin
+                baseColumnNames: board_id
+                constraintName: fk_pin_board
+                referencedTableName: board
+                referencedColumnNames: id
+                onDelete: CASCADE
+                onUpdate: CASCADE
+
+      rollback:
+          - dropForeignKeyConstraint:
+                baseTableName: pin
+                constraintName: fk_pin_board
+

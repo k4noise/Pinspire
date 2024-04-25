@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-pin-table
+      author: k4noise
+      changes:
+        - createTable:
+            tableName: pin
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(255)
+              - column:
+                  name: description
+                  type: varchar(255)
+              - column:
+                  name: image_url
+                  type: varchar(255)
+              - column:
+                  name: uploaded_at
+                  type: timestamp
+
+      rollback:
+         - dropTable:
+             tableName: pin

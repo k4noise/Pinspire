@@ -9,7 +9,7 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "boards")
+@Table(name = "board")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BoardEntity {
     @Id

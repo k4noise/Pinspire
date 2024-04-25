@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-board-user-foreign-key
+      author: k4noise
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: board
+            baseColumnNames: user_id
+            constraintName: fk_board_user
+            referencedTableName: user
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: CASCADE
+
+      rollback:
+        - dropForeignKeyConstraint:
+            baseTableName: board
+            constraintName: fk_board_user

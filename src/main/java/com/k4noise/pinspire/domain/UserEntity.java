@@ -9,7 +9,7 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "users")
+@Table(name = "user")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserEntity {
     @Id
@@ -27,6 +27,5 @@ public class UserEntity {
     String avatarUrl;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-
     List<BoardEntity> boards;
 }
