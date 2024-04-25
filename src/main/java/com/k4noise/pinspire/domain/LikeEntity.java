@@ -1,25 +1,24 @@
 package com.k4noise.pinspire.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
+@Data
 @Table(name = "likes")
-public class Like {
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class LikeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    UserEntity user;
 
     @ManyToOne
     @JoinColumn(name = "pin_id")
-    private Pin pin;
+    PinEntity pin;
 }

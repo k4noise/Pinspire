@@ -1,32 +1,37 @@
 package com.k4noise.pinspire.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
+@Data
 @Table(name = "pins")
-public class Pin {
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class PinEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
-    private String title;
-    private String description;
-    private String imageUrl;
-    private LocalDateTime uploadedAt;
+    String title;
+    String description;
+    String imageUrl;
+    LocalDateTime uploadedAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    UserEntity user;
 
     @ManyToOne
     @JoinColumn(name = "board_id")
-    private Board board;
+    BoardEntity board;
 
     @OneToMany(mappedBy = "pin", cascade = CascadeType.ALL)
-    private List<Comment> comments;
+    List<CommentEntity> comments;
 
     @OneToMany(mappedBy = "pin", cascade = CascadeType.ALL)
-    private List<Like> likes;
+    List<LikeEntity> likes;
 }

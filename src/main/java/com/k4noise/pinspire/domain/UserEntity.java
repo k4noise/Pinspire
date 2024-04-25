@@ -1,18 +1,17 @@
 package com.k4noise.pinspire.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
 
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
 import java.util.List;
 
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
+@Data
 @Table(name = "users")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class User {
+public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;
@@ -28,5 +27,6 @@ public class User {
     String avatarUrl;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Board> boards;
+
+    List<BoardEntity> boards;
 }

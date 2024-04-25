@@ -1,31 +1,30 @@
 package com.k4noise.pinspire.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
+@Data
 @Table(name = "comments")
-public class Comment {
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class CommentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
-    private String text;
+    String text;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    UserEntity user;
 
     @ManyToOne
     @JoinColumn(name = "pin_id")
-    private Pin pin;
+    PinEntity pin;
 
-    private LocalDateTime createdAt;
+    LocalDateTime createdAt;
 }
