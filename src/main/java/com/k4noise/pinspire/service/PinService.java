@@ -2,6 +2,7 @@ package com.k4noise.pinspire.service;
 
 import com.k4noise.pinspire.domain.PinEntity;
 import com.k4noise.pinspire.adapter.repository.PinRepository;
+import com.k4noise.pinspire.domain.UserEntity;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +49,10 @@ public class PinService {
     }
 
     @Transactional
-    public PinEntity createPin(PinEntity pin) {
+    public PinEntity createPin(PinEntity pin, Long userId) {
+        UserEntity user = userService.getUserById(userId);
+        pin.setUser(user);
+
         log.info("Created pin with id {}", pin.getId());
         return pinRepository.save(pin);
     }

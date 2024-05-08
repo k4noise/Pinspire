@@ -2,6 +2,8 @@ package com.k4noise.pinspire.service;
 
 import com.k4noise.pinspire.domain.CommentEntity;
 import com.k4noise.pinspire.adapter.repository.CommentRepository;
+import com.k4noise.pinspire.domain.PinEntity;
+import com.k4noise.pinspire.domain.UserEntity;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +44,11 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentEntity createComment(CommentEntity comment) {
+    public CommentEntity createComment(CommentEntity comment, Long userId, Long pinId) {
+        UserEntity user = userService.getUserById(userId);
+        PinEntity pin = pinService.getPinById(pinId);
+        comment.setUser(user);
+        comment.setPin(pin);
         return commentRepository.save(comment);
     }
 

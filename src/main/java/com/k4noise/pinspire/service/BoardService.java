@@ -2,6 +2,7 @@ package com.k4noise.pinspire.service;
 
 import com.k4noise.pinspire.domain.BoardEntity;
 import com.k4noise.pinspire.adapter.repository.BoardRepository;
+import com.k4noise.pinspire.domain.UserEntity;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +42,10 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardEntity createBoard(BoardEntity board) {
+    public BoardEntity createBoard(BoardEntity board, Long userId) {
+        UserEntity user = userService.getUserById(userId);
+        board.setUser(user);
+
         log.info("Created board with id {}", board.getId());
         return boardRepository.save(board);
     }

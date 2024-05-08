@@ -2,6 +2,8 @@ package com.k4noise.pinspire.service;
 
 import com.k4noise.pinspire.domain.LikeEntity;
 import com.k4noise.pinspire.adapter.repository.LikeRepository;
+import com.k4noise.pinspire.domain.PinEntity;
+import com.k4noise.pinspire.domain.UserEntity;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +40,11 @@ public class LikeService {
     }
 
     @Transactional
-    public LikeEntity createLike(LikeEntity like) {
+    public LikeEntity createLike(LikeEntity like, Long userId, Long pinId) {
+        UserEntity user = userService.getUserById(userId);
+        PinEntity pin = pinService.getPinById(pinId);
+        like.setUser(user);
+        like.setPin(pin);
         return likeRepository.save(like);
     }
 
