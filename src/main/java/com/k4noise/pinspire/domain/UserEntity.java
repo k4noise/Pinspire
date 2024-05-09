@@ -28,4 +28,14 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     List<BoardEntity> boards;
+
+    public static UserEntity create(String username, String email, String password) {
+        UserEntity user = new UserEntity();
+        user.setUsername(username);
+        user.setDisplayName(username);
+        user.setEmail(email);
+        user.setPassword(password);
+        user.setAvatarUrl("/default.png");
+        return user;
+    }
 }
