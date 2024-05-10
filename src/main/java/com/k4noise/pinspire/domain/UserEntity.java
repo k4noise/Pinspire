@@ -1,7 +1,6 @@
 package com.k4noise.pinspire.domain;
 
 import jakarta.persistence.*;
-
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -9,7 +8,7 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "user")
+@Table(name = "app_user")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserEntity {
     @Id

@@ -49,9 +49,10 @@ public class UserService {
         }
 
         String encodedPassword = encoder.encode(userDto.password());
-        UserEntity user = UserEntity.create(userDto.username(), encodedPassword, userDto.email());
-        log.info("Created user with id {} and username {}", user.getId(), user.getUsername());
-        return userMapper.entityToResponse(userRepository.save(user));
+        UserEntity newUser = UserEntity.create(userDto.username(), userDto.email(), encodedPassword);
+        UserEntity savedUser = userRepository.save(newUser);
+        log.info("Created user with id {} and username {}", savedUser.getId(), savedUser.getUsername());
+        return userMapper.entityToResponse(savedUser);
     }
 
     @Transactional
