@@ -11,9 +11,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -40,7 +43,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDto registerUser(UserRequestDto userDto) {
+    public UserResponseDto registerUser(UserRequestDto userDto) throws EntityExistsException {
         if (userRepository.existsUserByUsername(userDto.username())) {
             throw new EntityExistsException("User with username " + userDto.username() + " already exists");
         }
@@ -56,8 +59,11 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDto updateUser(Long id, UserRequestDto userDto) {
+    public UserResponseDto updateUser(Principal principal, Long id, UserRequestDto userDto) throws EntityNotFoundException, AccessDeniedException {
         UserEntity user = getUserEntityById(id);
+        if (!Objects.equals(user.getUsername(), principal.getName())) {
+            throw new AccessDeniedException("Action with another user is prohibited");
+        }
         if (!Objects.equals(user.getUsername(), userDto.username()) && userRepository.existsUserByUsername(userDto.username())) {
             user.setUsername(userDto.username());
         }
@@ -70,8 +76,11 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(Long id) {
+    public void deleteUser(Principal principal, Long id) throws EntityNotFoundException, AccessDeniedException {
         UserEntity user = getUserEntityById(id);
+        if (!Objects.equals(user.getUsername(), principal.getName())) {
+            throw new AccessDeniedException("Action with another user is prohibited");
+        }
         userRepository.delete(user);
         log.info("Deleted user with id {}", user.getId());
     }
