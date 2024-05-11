@@ -1,5 +1,6 @@
 package com.k4noise.pinspire.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -18,9 +19,11 @@ public class UserEntity {
     @Column(unique = true)
     String username;
 
+    @JsonIgnore
     @Column(unique = true)
     String email;
 
+    @JsonIgnore
     String password;
     String displayName;
     String avatarUrl;

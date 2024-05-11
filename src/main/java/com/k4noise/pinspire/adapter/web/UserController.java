@@ -1,7 +1,7 @@
 package com.k4noise.pinspire.adapter.web;
 
-import com.k4noise.pinspire.adapter.web.dto.UserRequestDto;
-import com.k4noise.pinspire.adapter.web.dto.UserResponseDto;
+import com.k4noise.pinspire.adapter.web.dto.request.UserRequestDto;
+import com.k4noise.pinspire.adapter.web.dto.response.UserResponseDto;
 import com.k4noise.pinspire.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -38,12 +38,12 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     public UserResponseDto updateUser(@PathVariable Long id, Principal principal, @Valid @RequestBody UserRequestDto userDto) {
         return service.updateUser(principal, id, userDto);
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable Long id, Principal principal) {
         service.deleteUser(principal, id);
     }

@@ -1,7 +1,7 @@
 package com.k4noise.pinspire.service;
 
-import com.k4noise.pinspire.adapter.web.dto.UserRequestDto;
-import com.k4noise.pinspire.adapter.web.dto.UserResponseDto;
+import com.k4noise.pinspire.adapter.web.dto.request.UserRequestDto;
+import com.k4noise.pinspire.adapter.web.dto.response.UserResponseDto;
 import com.k4noise.pinspire.domain.UserEntity;
 import com.k4noise.pinspire.adapter.repository.UserRepository;
 import com.k4noise.pinspire.service.mapper.UserMapper;
@@ -15,7 +15,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
@@ -42,6 +41,11 @@ public class UserService {
         return userMapper.entityToResponse(getUserEntityById(id));
     }
 
+    public UserEntity getUserEntityById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+    }
+
     @Transactional
     public UserResponseDto registerUser(UserRequestDto userDto) throws EntityExistsException {
         if (userRepository.existsUserByUsername(userDto.username())) {
@@ -64,12 +68,8 @@ public class UserService {
         if (!Objects.equals(user.getUsername(), principal.getName())) {
             throw new AccessDeniedException("Action with another user is prohibited");
         }
-        if (!Objects.equals(user.getUsername(), userDto.username()) && userRepository.existsUserByUsername(userDto.username())) {
-            user.setUsername(userDto.username());
-        }
-        if (!Objects.equals(user.getEmail(), userDto.email()) && userRepository.existsUserByEmail(userDto.email())) {
-            user.setEmail(userDto.email());
-        }
+        user.setUsername(userDto.username());
+        user.setEmail(userDto.email());
         user.setPassword(encoder.encode(userDto.password()));
         user.setDisplayName(Optional.ofNullable(userDto.displayName()).orElse(user.getDisplayName()));
         return userMapper.entityToResponse(userRepository.save(user));
@@ -83,10 +83,5 @@ public class UserService {
         }
         userRepository.delete(user);
         log.info("Deleted user with id {}", user.getId());
-    }
-
-    private UserEntity getUserEntityById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
     }
 }

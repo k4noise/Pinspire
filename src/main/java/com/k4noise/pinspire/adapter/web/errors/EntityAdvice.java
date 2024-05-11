@@ -1,6 +1,6 @@
 package com.k4noise.pinspire.adapter.web.errors;
 
-import com.k4noise.pinspire.adapter.web.dto.ErrorResponseDto;
+import com.k4noise.pinspire.adapter.web.dto.response.ErrorResponseDto;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.log4j.Log4j2;
