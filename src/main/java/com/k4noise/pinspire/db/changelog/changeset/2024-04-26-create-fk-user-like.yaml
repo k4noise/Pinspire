@@ -4,10 +4,10 @@ databaseChangeLog:
       author: k4noise
       changes:
         - addForeignKeyConstraint:
-            baseTableName: likes
+            baseTableName: pin_like
             baseColumnNames: user_id
             constraintName: fk_like_user
-            referencedTableName: user
+            referencedTableName: app_user
             referencedColumnNames: id
             onDelete: CASCADE
             onUpdate: CASCADE

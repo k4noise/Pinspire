@@ -7,7 +7,7 @@ databaseChangeLog:
             baseTableName: comment
             baseColumnNames: user_id
             constraintName: fk_comment_user
-            referencedTableName: user
+            referencedTableName: app_user
             referencedColumnNames: id
             onDelete: CASCADE
             onUpdate: CASCADE

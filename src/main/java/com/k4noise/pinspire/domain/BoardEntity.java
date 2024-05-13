@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-
 import java.util.List;
 
 @Entity

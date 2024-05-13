@@ -4,7 +4,7 @@ databaseChangeLog:
       author: k4noise
       changes:
         - createTable:
-            tableName: like
+            tableName: pin_like
             columns:
               - column:
                   name: id

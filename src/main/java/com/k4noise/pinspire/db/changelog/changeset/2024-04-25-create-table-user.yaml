@@ -4,7 +4,7 @@ databaseChangeLog:
       author: k4noise
       changes:
         - createTable:
-            tableName: user
+            tableName: app_user
             columns:
               - column:
                   name: id

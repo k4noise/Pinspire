@@ -7,7 +7,7 @@ databaseChangeLog:
             baseTableName: board
             baseColumnNames: user_id
             constraintName: fk_board_user
-            referencedTableName: user
+            referencedTableName: app_user
             referencedColumnNames: id
             onDelete: CASCADE
             onUpdate: CASCADE
