@@ -12,10 +12,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -57,15 +56,12 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentResponseDto createComment(Principal principal, CommentRequestDto commentDto) throws EntityNotFoundException, AccessDeniedException  {
-        UserEntity user = userService.getUserEntityById(commentDto.userId());
-        PinEntity pin = pinService.getPinEntityById(commentDto.pinId());
-
-        if (!Objects.equals(principal.getName(), user.getUsername())) {
-            throw new AccessDeniedException("Action with another user is prohibited");
-        }
+    public CommentResponseDto createComment(UserDetails userDetails, Long pinId, CommentRequestDto commentDto) throws EntityNotFoundException  {
+        PinEntity pin = pinService.getPinEntityById(pinId);
+        UserEntity user = userService.getUserEntityByUsername(userDetails.getUsername());
 
         CommentEntity comment = new CommentEntity();
+        comment.setText(commentDto.text());
         comment.setUser(user);
         comment.setPin(pin);
         comment.setCreatedAt(LocalDateTime.now());
@@ -73,13 +69,13 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentResponseDto updateComment(Principal principal, Long id, CommentRequestDto commentDto) throws EntityNotFoundException, AccessDeniedException {
+    public CommentResponseDto updateComment(UserDetails userDetails, Long id, CommentRequestDto commentDto) throws EntityNotFoundException, AccessDeniedException {
         if (!existsCommentById(id)) {
             throw new EntityNotFoundException("Comment not found with id: " + id);
         }
         CommentEntity comment = getCommentEntityById(id);
 
-        if (!Objects.equals(principal.getName(), comment.getUser().getUsername())) {
+        if (!Objects.equals(userDetails.getUsername(), comment.getUser().getUsername())) {
             throw new AccessDeniedException("Action with another user pin is prohibited");
         }
 
@@ -88,9 +84,9 @@ public class CommentService {
     }
 
     @Transactional
-    public void deleteComment(Principal principal, Long id) throws EntityNotFoundException, AccessDeniedException {
+    public void deleteComment(UserDetails userDetails, Long id) throws EntityNotFoundException, AccessDeniedException {
         CommentEntity comment = getCommentEntityById(id);
-        if (!Objects.equals(principal.getName(), comment.getUser().getUsername())) {
+        if (!Objects.equals(userDetails.getUsername(), comment.getUser().getUsername())) {
             throw new AccessDeniedException("Action with another user pin is prohibited");
         }
         commentRepository.delete(comment);

@@ -8,10 +8,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -27,24 +27,25 @@ public class BoardController {
         return boardService.getBoardById(id);
     }
 
-    @GetMapping("/user/{id}")
-    public List<BoardResponseDto> getBoardsByUser(@PathVariable Long id) {
-        return boardService.getBoardsByUser(id);
+    @GetMapping("/user/{userId}")
+    public List<BoardResponseDto> getBoardsByUser(@PathVariable Long userId) {
+        return boardService.getBoardsByUser(userId);
     }
 
     @PostMapping()
-    public BoardResponseDto createBoard(Principal principal, @Valid BoardRequestDto boardDto) {
-        return boardService.createBoard(principal, boardDto);
+    @ResponseStatus(HttpStatus.CREATED)
+    public BoardResponseDto createBoard(@AuthenticationPrincipal UserDetails user, @Valid @RequestBody BoardRequestDto boardDto) {
+        return boardService.createBoard(user, boardDto);
     }
 
     @PutMapping("/{id}")
-    public BoardResponseDto updateBoard(@PathVariable Long id, Principal principal, @Valid BoardRequestDto boardDto) {
-        return boardService.updateBoard(principal, id, boardDto);
+    public BoardResponseDto updateBoard(@PathVariable Long id, @AuthenticationPrincipal UserDetails user, @Valid @RequestBody BoardRequestDto boardDto) {
+        return boardService.updateBoard(user, id, boardDto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteBoard(@PathVariable Long id, Principal principal) {
-        boardService.deleteBoard(principal, id);
+    public void deleteBoard(@PathVariable Long id, @AuthenticationPrincipal UserDetails user) {
+        boardService.deleteBoard(user, id);
     }
 }

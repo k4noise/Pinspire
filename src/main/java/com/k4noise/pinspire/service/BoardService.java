@@ -12,10 +12,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.security.Principal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -36,12 +36,12 @@ public class BoardService {
         return boardMapper.entityToResponse(getBoardEntityById(id));
     }
 
-    public BoardEntity getBoardEntityById(Long id) {
+    public BoardEntity getBoardEntityById(Long id) throws EntityNotFoundException {
         return boardRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Board not found with id: " + id));
     }
 
-    public List<BoardResponseDto> getBoardsByUser(Long userId) {
+    public List<BoardResponseDto> getBoardsByUser(Long userId) throws EntityNotFoundException{
         if (!userService.existsUserById(userId)) {
             throw new EntityNotFoundException("User not found with id: " + userId);
         }
@@ -49,17 +49,13 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardResponseDto createBoard(Principal principal, BoardRequestDto boardDto) {
+    public BoardResponseDto createBoard(UserDetails userDetails, BoardRequestDto boardDto) {
         BoardEntity board = new BoardEntity();
-        UserEntity user = userService.getUserEntityById(boardDto.userId());
-
-        if (!Objects.equals(principal.getName(), user.getUsername())) {
-            throw new AccessDeniedException("Action with another user is prohibited");
-        }
-
+        UserEntity user = userService.getUserEntityByUsername(userDetails.getUsername());
         board.setName(boardDto.name());
         board.setDescription(boardDto.description());
         board.setUser(user);
+        board.setPins(Collections.emptyList());
 
         BoardEntity savedBoard = boardRepository.save(board);
         log.info("Created board with id {}", board.getId());
@@ -67,9 +63,10 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardResponseDto updateBoard(Principal principal, Long id, BoardRequestDto boardDto) {
+    public BoardResponseDto updateBoard(UserDetails userDetails, Long id, BoardRequestDto boardDto) throws EntityNotFoundException, AccessDeniedException {
         BoardEntity board = getBoardEntityById(id);
-        if (!Objects.equals(principal.getName(), board.getUser().getUsername())) {
+
+        if (!Objects.equals(userDetails.getUsername(), board.getUser().getUsername())) {
             throw new AccessDeniedException("Action with another user pin is prohibited");
         }
 
@@ -79,9 +76,9 @@ public class BoardService {
     }
 
     @Transactional
-    public void deleteBoard(Principal principal, Long id) {
+    public void deleteBoard(UserDetails userDetails, Long id) throws EntityNotFoundException, AccessDeniedException {
         BoardEntity board = getBoardEntityById(id);
-        if (!Objects.equals(principal.getName(), board.getUser().getUsername())) {
+        if (!Objects.equals(userDetails.getUsername(), board.getUser().getUsername())) {
             throw new AccessDeniedException("Action with another user pin is prohibited");
         }
 

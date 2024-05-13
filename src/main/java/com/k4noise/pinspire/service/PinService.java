@@ -13,10 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -59,16 +58,12 @@ public class PinService {
     }
 
     @Transactional
-    public PinResponseDto createPin(Principal principal, PinRequestDto pinDto) throws EntityNotFoundException {
-        UserEntity user = userService.getUserEntityById(pinDto.userId());
-        BoardEntity board = boardService.getBoardEntityById(pinDto.boardId());
-
-        if (!Objects.equals(principal.getName(), user.getUsername())) {
-            throw new AccessDeniedException("Action with another user is prohibited");
-        }
+    public PinResponseDto createPin(UserDetails userDetails, Long boardId, PinRequestDto pinDto) throws AccessDeniedException {
+        BoardEntity board = boardService.getBoardEntityById(boardId);
+        UserEntity user = userService.getUserEntityByUsername(userDetails.getUsername());
 
         if (!user.getBoards().contains(board)) {
-            throw new AccessDeniedException("Action with another user board is prohibited");
+            throw new AccessDeniedException("Action with another userDetails board is prohibited");
         }
 
         PinEntity pin = new PinEntity();
@@ -85,13 +80,10 @@ public class PinService {
     }
 
     @Transactional
-    public PinResponseDto updatePin(Principal principal, Long id, PinRequestDto pinDto) throws EntityNotFoundException, AccessDeniedException {
+    public PinResponseDto updatePin(UserDetails userDetails, Long id, PinRequestDto pinDto) throws EntityNotFoundException, AccessDeniedException {
         PinEntity pin = getPinEntityById(id);
-        if (!Objects.equals(principal.getName(), pin.getUser().getUsername())) {
-            throw new AccessDeniedException("Action with another user pin is prohibited");
-        }
-        if (!existsPinById(pin.getId())) {
-            throw new EntityNotFoundException("Pin not found with id " + pin.getId());
+        if (!Objects.equals(userDetails.getUsername(), pin.getUser().getUsername())) {
+            throw new AccessDeniedException("Action with another userDetails pin is prohibited");
         }
         pin.setTitle(pinDto.title());
         pin.setDescription(pinDto.description());
@@ -100,9 +92,9 @@ public class PinService {
     }
 
     @Transactional
-    public void deletePin(Principal principal, Long id) throws EntityNotFoundException, AccessDeniedException {
+    public void deletePin(UserDetails userDetails, Long id) throws EntityNotFoundException, AccessDeniedException {
         PinEntity pin = getPinEntityById(id);
-        if (!Objects.equals(principal.getName(), pin.getUser().getUsername())) {
+        if (!Objects.equals(userDetails.getUsername(), pin.getUser().getUsername())) {
             throw new AccessDeniedException("Action with another user pin is prohibited");
         }
         pinRepository.delete(pin);

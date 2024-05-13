@@ -11,11 +11,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,12 +37,14 @@ public class UserService {
     }
 
     public UserResponseDto getUserById(Long id) {
-        return userMapper.entityToResponse(getUserEntityById(id));
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+        return userMapper.entityToResponse(user);
     }
 
-    public UserEntity getUserEntityById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+    public UserEntity getUserEntityByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with username: " + username));
     }
 
     @Transactional
@@ -63,24 +64,26 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDto updateUser(Principal principal, Long id, UserRequestDto userDto) throws EntityNotFoundException, AccessDeniedException {
-        UserEntity user = getUserEntityById(id);
-        if (!Objects.equals(user.getUsername(), principal.getName())) {
-            throw new AccessDeniedException("Action with another user is prohibited");
+    public UserResponseDto updateUser(UserDetails userDetails, UserRequestDto userDto) throws EntityExistsException{
+        UserEntity user = getUserEntityByUsername(userDetails.getUsername());
+        if (!Objects.equals(user.getUsername(), userDto.username()) && userRepository.existsUserByUsername(userDto.username())) {
+            throw new EntityExistsException("User with username " + userDto.username() + " already exists");
+        }
+        if (!Objects.equals(user.getEmail(), userDto.email()) && userRepository.existsUserByEmail(userDto.email())) {
+            throw new EntityExistsException("User with email " + userDto.email() + " already exists");
         }
         user.setUsername(userDto.username());
         user.setEmail(userDto.email());
-        user.setPassword(encoder.encode(userDto.password()));
+        if (!userDto.password().isBlank()) {
+            user.setPassword(encoder.encode(userDto.password()));
+        }
         user.setDisplayName(Optional.ofNullable(userDto.displayName()).orElse(user.getDisplayName()));
         return userMapper.entityToResponse(userRepository.save(user));
     }
 
     @Transactional
-    public void deleteUser(Principal principal, Long id) throws EntityNotFoundException, AccessDeniedException {
-        UserEntity user = getUserEntityById(id);
-        if (!Objects.equals(user.getUsername(), principal.getName())) {
-            throw new AccessDeniedException("Action with another user is prohibited");
-        }
+    public void deleteUser(UserDetails userDetails) {
+        UserEntity user = getUserEntityByUsername(userDetails.getUsername());
         userRepository.delete(user);
         log.info("Deleted user with id {}", user.getId());
     }

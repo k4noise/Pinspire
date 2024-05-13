@@ -8,10 +8,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -27,30 +28,30 @@ public class PinController {
         return pinService.getPinById(id);
     }
 
-    @GetMapping("/user/{id}")
-    public List<PinResponseDto> getPinsByUser(@PathVariable Long id) {
-        return pinService.getPinsByUser(id);
+    @GetMapping("/user/{userId}")
+    public List<PinResponseDto> getPinsByUser(@PathVariable Long userId) {
+        return pinService.getPinsByUser(userId);
     }
 
-    @GetMapping("/board/{id}")
-    public List<PinResponseDto> getPinsByBoard(@PathVariable Long id) {
-        return pinService.getPinsByBoard(id);
+    @GetMapping("/board/{boardId}")
+    public List<PinResponseDto> getPinsByBoard(@PathVariable Long boardId) {
+        return pinService.getPinsByBoard(boardId);
     }
 
-    @PostMapping
+    @PostMapping("/{boardId}")
     @ResponseStatus(HttpStatus.CREATED)
-    public PinResponseDto createPin(Principal principal, @Valid PinRequestDto pinDto) {
-        return pinService.createPin(principal, pinDto);
+    public PinResponseDto createPin(@PathVariable Long boardId, @AuthenticationPrincipal UserDetails user, @Valid @RequestBody PinRequestDto pinDto) {
+        return pinService.createPin(user, boardId, pinDto);
     }
 
     @PutMapping("/{id}")
-    public PinResponseDto updatePin(@PathVariable Long id, Principal principal, @Valid PinRequestDto pinDto) {
-        return pinService.updatePin(principal, id, pinDto);
+    public PinResponseDto updatePin(@PathVariable Long id, @AuthenticationPrincipal UserDetails user, @Valid @RequestBody PinRequestDto pinDto) {
+        return pinService.updatePin(user, id, pinDto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePin(@PathVariable Long id, Principal principal) {
-        pinService.deletePin(principal, id);
+    public void deletePin(@PathVariable Long id, @AuthenticationPrincipal UserDetails user) {
+        pinService.deletePin(user, id);
     }
 }

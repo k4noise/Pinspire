@@ -1,6 +1,5 @@
 package com.k4noise.pinspire.service;
 
-import com.k4noise.pinspire.adapter.web.dto.request.LikeRequestDto;
 import com.k4noise.pinspire.adapter.web.dto.response.LikeResponseDto;
 import com.k4noise.pinspire.domain.LikeEntity;
 import com.k4noise.pinspire.adapter.repository.LikeRepository;
@@ -12,10 +11,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
 
@@ -52,25 +50,21 @@ public class LikeService {
     }
 
     @Transactional
-    public LikeResponseDto createLike(Principal principal, LikeRequestDto likeDto) throws EntityNotFoundException, AccessDeniedException  {
-        UserEntity user = userService.getUserEntityById(likeDto.userId());
-        PinEntity pin = pinService.getPinEntityById(likeDto.pinId());
-
-        if (!Objects.equals(principal.getName(), user.getUsername())) {
-            throw new AccessDeniedException("Action with another user is prohibited");
-        }
+    public void createLike(UserDetails userDetails, Long pinId) throws EntityNotFoundException  {
+        PinEntity pin = pinService.getPinEntityById(pinId);
+        UserEntity user = userService.getUserEntityByUsername(userDetails.getUsername());
 
         LikeEntity like = new LikeEntity();
         like.setUser(user);
         like.setPin(pin);
-        return likeMapper.entityToResponse(likeRepository.save(like));
+        likeRepository.save(like);
     }
 
     @Transactional
-    public void deleteLike(Principal principal, Long id) throws EntityNotFoundException, AccessDeniedException  {
+    public void deleteLike(UserDetails userDetails, Long id) throws EntityNotFoundException, AccessDeniedException  {
         LikeEntity like = getLikeEntityById(id);
-        if (!Objects.equals(principal.getName(), like.getUser().getUsername())) {
-            throw new AccessDeniedException("Action with another user pin is prohibited");
+        if (!Objects.equals(userDetails.getUsername(), like.getUser().getUsername())) {
+            throw new AccessDeniedException("Action with another user like is prohibited");
         }
         likeRepository.delete(like);
     }

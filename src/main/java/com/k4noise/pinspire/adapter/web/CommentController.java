@@ -8,10 +8,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -27,29 +27,30 @@ public class CommentController {
         return commentService.getCommentById(id);
     }
 
-    @GetMapping("/user/{id}")
-    public List<CommentResponseDto> getCommentsByUser(@PathVariable Long id) {
-        return commentService.getCommentsByUser(id);
+    @GetMapping("/user/{userId}")
+    public List<CommentResponseDto> getCommentsByUser(@PathVariable Long userId) {
+        return commentService.getCommentsByUser(userId);
     }
 
-    @GetMapping("/pin/{id}")
-    public List<CommentResponseDto> getCommentsByPin(@PathVariable Long id) {
-        return commentService.getCommentsByPin(id);
+    @GetMapping("/pin/{pinId}")
+    public List<CommentResponseDto> getCommentsByPin(@PathVariable Long pinId) {
+        return commentService.getCommentsByPin(pinId);
     }
 
-    @PostMapping
-    public CommentResponseDto createComment(Principal principal, @Valid CommentRequestDto commentDto) {
-        return commentService.createComment(principal, commentDto);
+    @PostMapping("/{pinId}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentResponseDto createComment(@PathVariable Long pinId, @AuthenticationPrincipal UserDetails user, @Valid @RequestBody CommentRequestDto commentDto) {
+        return commentService.createComment(user, pinId, commentDto);
     }
 
     @PutMapping("/{id}")
-    public CommentResponseDto updateComment(@PathVariable Long id, Principal principal, @Valid CommentRequestDto commentDto) {
-        return commentService.updateComment(principal, id, commentDto);
+    public CommentResponseDto updateComment(@PathVariable Long id, @AuthenticationPrincipal UserDetails user, @Valid @RequestBody CommentRequestDto commentDto) {
+        return commentService.updateComment(user, id, commentDto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteComment(@PathVariable Long id, Principal principal) {
-        commentService.deleteComment(principal, id);
+    public void deleteComment(@PathVariable Long id, @AuthenticationPrincipal UserDetails user) {
+        commentService.deleteComment(user, id);
     }
 }
