@@ -28,19 +28,23 @@ public class CommentService {
     PinService pinService;
     CommentMapper commentMapper;
 
+    @Transactional(readOnly = true)
     public boolean existsCommentById(Long id) {
         return commentRepository.existsById(id);
     }
 
+    @Transactional(readOnly = true)
     public CommentResponseDto getCommentById(Long id) {
         return commentMapper.entityToResponse(getCommentEntityById(id));
     }
 
+    @Transactional(readOnly = true)
     public CommentEntity getCommentEntityById(Long id) throws EntityNotFoundException {
         return commentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Comment not found with id: " + id));
     }
 
+    @Transactional(readOnly = true)
     public List<CommentResponseDto> getCommentsByUser(Long userId) throws EntityNotFoundException {
         if (!userService.existsUserById(userId)) {
             throw new EntityNotFoundException("User not found with id: " + userId);
@@ -48,6 +52,7 @@ public class CommentService {
         return commentMapper.entitiesToResponse(commentRepository.findByUserId(userId));
     }
 
+    @Transactional(readOnly = true)
     public List<CommentResponseDto> getCommentsByPin(Long pinId) throws EntityNotFoundException {
         if (!pinService.existsPinById(pinId)) {
             throw new EntityNotFoundException("Pin not found with id: " + pinId);

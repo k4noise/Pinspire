@@ -30,19 +30,23 @@ public class PinService {
     UserService userService;
     BoardService boardService;
 
+    @Transactional(readOnly = true)
     public boolean existsPinById(Long id) {
         return pinRepository.existsById(id);
     }
 
+    @Transactional(readOnly = true)
     public PinResponseDto getPinById(Long id) {
         return pinMapper.entityToResponse(getPinEntityById(id));
     }
 
+    @Transactional(readOnly = true)
     public PinEntity getPinEntityById(Long id) throws EntityNotFoundException {
         return pinRepository.findById(id)
                 .orElseThrow(() ->  new EntityNotFoundException("Pin not found with id: " + id));
     }
 
+    @Transactional(readOnly = true)
     public List<PinResponseDto> getPinsByUser(Long userId) throws EntityNotFoundException {
         if (!userService.existsUserById(userId)) {
             throw new EntityNotFoundException("User not found with id: " + userId);
@@ -50,6 +54,7 @@ public class PinService {
         return pinMapper.entitiesToResponse(pinRepository.findByUserId(userId));
     }
 
+    @Transactional(readOnly = true)
     public List<PinResponseDto> getPinsByBoard(Long boardId) throws EntityNotFoundException{
         if (!boardService.existsByBoardId(boardId)) {
             throw new EntityNotFoundException("Board not found with id: " + boardId);

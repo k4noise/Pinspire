@@ -28,20 +28,24 @@ public class UserService {
     UserMapper userMapper;
     PasswordEncoder encoder;
 
+    @Transactional(readOnly = true)
     public boolean existsUserById(Long id) {
         return userRepository.existsById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<UserResponseDto> getAllUsers() {
         return userMapper.entitiesToResponse(userRepository.findAll());
     }
 
+    @Transactional(readOnly = true)
     public UserResponseDto getUserById(Long id) {
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
         return userMapper.entityToResponse(user);
     }
 
+    @Transactional(readOnly = true)
     public UserEntity getUserEntityByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with username: " + username));

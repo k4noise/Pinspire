@@ -26,15 +26,18 @@ public class LikeService {
     PinService pinService;
     LikeMapper likeMapper;
 
+    @Transactional(readOnly = true)
     public LikeResponseDto getLikeById(Long id) {
         return likeMapper.entityToResponse(getLikeEntityById(id));
     }
 
+    @Transactional(readOnly = true)
     public LikeEntity getLikeEntityById(Long id) throws EntityNotFoundException {
         return likeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Like not found with id: " + id));
     }
 
+    @Transactional(readOnly = true)
     public List<LikeResponseDto> getLikesByUser(Long userId) throws EntityNotFoundException {
         if (!userService.existsUserById(userId)) {
             throw new EntityNotFoundException("User not found with id: " + userId);
@@ -42,6 +45,7 @@ public class LikeService {
         return likeMapper.entitiesToResponse(likeRepository.findByUserId(userId));
     }
 
+    @Transactional(readOnly = true)
     public List<LikeResponseDto> getLikesByPin(Long pinId) throws EntityNotFoundException {
         if (!pinService.existsPinById(pinId)) {
             throw new EntityNotFoundException("Pin not found with id: " + pinId);

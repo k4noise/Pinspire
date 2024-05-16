@@ -28,19 +28,23 @@ public class BoardService {
     UserService userService;
     BoardMapper boardMapper;
 
+    @Transactional(readOnly = true)
     public boolean existsByBoardId(Long id) {
         return boardRepository.existsById(id);
     }
 
+    @Transactional(readOnly = true)
     public BoardResponseDto getBoardById(Long id) {
         return boardMapper.entityToResponse(getBoardEntityById(id));
     }
 
+    @Transactional(readOnly = true)
     public BoardEntity getBoardEntityById(Long id) throws EntityNotFoundException {
         return boardRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Board not found with id: " + id));
     }
 
+    @Transactional(readOnly = true)
     public List<BoardResponseDto> getBoardsByUser(Long userId) throws EntityNotFoundException{
         if (!userService.existsUserById(userId)) {
             throw new EntityNotFoundException("User not found with id: " + userId);
