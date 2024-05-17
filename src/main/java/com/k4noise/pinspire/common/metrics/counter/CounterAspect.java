@@ -15,11 +15,6 @@ import org.springframework.stereotype.Component;
 public class CounterAspect {
    CounterActuator counterActuator;
 
-    @After("@annotation(CounterMetric) && within(com.k4noise.pinspire.service.UserService)")
-    public void incrementUserCount() {
-       counterActuator.incrementUserCount();
-    }
-
     @After("@annotation(CounterMetric) && within(com.k4noise.pinspire.service.PinService)")
     public void incrementPinCount() {
        counterActuator.incrementPinCount();

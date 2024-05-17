@@ -1,5 +1,6 @@
 package com.k4noise.pinspire.service;
 
+import com.k4noise.pinspire.adapter.event.UserCreateEvent;
 import com.k4noise.pinspire.adapter.web.dto.request.UserRequestDto;
 import com.k4noise.pinspire.adapter.web.dto.response.UserResponseDto;
 import com.k4noise.pinspire.common.metrics.counter.CounterMetric;
@@ -12,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
     PasswordEncoder encoder;
+    ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public boolean existsUserById(Long id) {
@@ -53,7 +56,7 @@ public class UserService {
     }
 
     @Transactional
-    @CounterMetric
+//    @CounterMetric
     public UserResponseDto registerUser(UserRequestDto userDto) throws EntityExistsException {
         if (userRepository.existsUserByUsername(userDto.username())) {
             throw new EntityExistsException("User with username " + userDto.username() + " already exists");
@@ -65,6 +68,7 @@ public class UserService {
         String encodedPassword = encoder.encode(userDto.password());
         UserEntity newUser = UserEntity.create(userDto.username(), userDto.email(), encodedPassword);
         UserEntity savedUser = userRepository.save(newUser);
+        eventPublisher.publishEvent(new UserCreateEvent());
         log.info("Created user with id {} and username {}", savedUser.getId(), savedUser.getUsername());
         return userMapper.entityToResponse(savedUser);
     }
