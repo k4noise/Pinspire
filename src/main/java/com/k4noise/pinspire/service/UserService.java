@@ -2,6 +2,7 @@ package com.k4noise.pinspire.service;
 
 import com.k4noise.pinspire.adapter.web.dto.request.UserRequestDto;
 import com.k4noise.pinspire.adapter.web.dto.response.UserResponseDto;
+import com.k4noise.pinspire.common.metrics.counter.CounterMetric;
 import com.k4noise.pinspire.domain.UserEntity;
 import com.k4noise.pinspire.adapter.repository.UserRepository;
 import com.k4noise.pinspire.service.mapper.UserMapper;
@@ -52,6 +53,7 @@ public class UserService {
     }
 
     @Transactional
+    @CounterMetric
     public UserResponseDto registerUser(UserRequestDto userDto) throws EntityExistsException {
         if (userRepository.existsUserByUsername(userDto.username())) {
             throw new EntityExistsException("User with username " + userDto.username() + " already exists");

@@ -2,6 +2,7 @@ package com.k4noise.pinspire.service;
 
 import com.k4noise.pinspire.adapter.web.dto.request.PinRequestDto;
 import com.k4noise.pinspire.adapter.web.dto.response.PinResponseDto;
+import com.k4noise.pinspire.common.metrics.counter.CounterMetric;
 import com.k4noise.pinspire.domain.BoardEntity;
 import com.k4noise.pinspire.domain.PinEntity;
 import com.k4noise.pinspire.adapter.repository.PinRepository;
@@ -63,6 +64,7 @@ public class PinService {
     }
 
     @Transactional
+    @CounterMetric
     public PinResponseDto createPin(UserDetails userDetails, Long boardId, PinRequestDto pinDto) throws AccessDeniedException {
         BoardEntity board = boardService.getBoardEntityById(boardId);
         UserEntity user = userService.getUserEntityByUsername(userDetails.getUsername());

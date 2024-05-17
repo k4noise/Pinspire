@@ -2,6 +2,7 @@ package com.k4noise.pinspire.service;
 
 import com.k4noise.pinspire.adapter.web.dto.request.BoardRequestDto;
 import com.k4noise.pinspire.adapter.web.dto.response.BoardResponseDto;
+import com.k4noise.pinspire.common.metrics.counter.CounterMetric;
 import com.k4noise.pinspire.domain.BoardEntity;
 import com.k4noise.pinspire.adapter.repository.BoardRepository;
 import com.k4noise.pinspire.domain.UserEntity;
@@ -53,6 +54,7 @@ public class BoardService {
     }
 
     @Transactional
+    @CounterMetric
     public BoardResponseDto createBoard(UserDetails userDetails, BoardRequestDto boardDto) {
         BoardEntity board = new BoardEntity();
         UserEntity user = userService.getUserEntityByUsername(userDetails.getUsername());
