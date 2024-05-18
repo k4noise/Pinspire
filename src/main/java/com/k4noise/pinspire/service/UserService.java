@@ -3,7 +3,7 @@ package com.k4noise.pinspire.service;
 import com.k4noise.pinspire.adapter.event.UserCreateEvent;
 import com.k4noise.pinspire.adapter.web.dto.request.UserRequestDto;
 import com.k4noise.pinspire.adapter.web.dto.response.UserResponseDto;
-import com.k4noise.pinspire.common.metrics.counter.CounterMetric;
+import com.k4noise.pinspire.adapter.web.errors.FileStorageException;
 import com.k4noise.pinspire.domain.UserEntity;
 import com.k4noise.pinspire.adapter.repository.UserRepository;
 import com.k4noise.pinspire.service.mapper.UserMapper;
@@ -14,10 +14,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -56,7 +62,6 @@ public class UserService {
     }
 
     @Transactional
-//    @CounterMetric
     public UserResponseDto registerUser(UserRequestDto userDto) throws EntityExistsException {
         if (userRepository.existsUserByUsername(userDto.username())) {
             throw new EntityExistsException("User with username " + userDto.username() + " already exists");
@@ -92,9 +97,45 @@ public class UserService {
     }
 
     @Transactional
+    public void updateUserAvatar(UserDetails userDetails, String avatarUrl) throws FileStorageException {
+        UserEntity user = getUserEntityByUsername(userDetails.getUsername());
+        if (!isUrlValid(avatarUrl)) {
+            throw new FileStorageException("File URL is not valid: " + avatarUrl, HttpStatus.BAD_REQUEST);
+        }
+
+        if (!urlExists(avatarUrl)) {
+            throw new FileStorageException("File not exists with given URL: " + avatarUrl, HttpStatus.NOT_FOUND);
+        }
+
+        user.setAvatarUrl(avatarUrl);
+    }
+
+    @Transactional
     public void deleteUser(UserDetails userDetails) {
         UserEntity user = getUserEntityByUsername(userDetails.getUsername());
         userRepository.delete(user);
         log.info("Deleted user with id {}", user.getId());
+    }
+
+    private boolean isUrlValid(String urlString) {
+        try {
+            UriComponentsBuilder.fromHttpUrl(urlString).build().toUri();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private boolean urlExists(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("HEAD");
+            connection.connect();
+            int responseCode = connection.getResponseCode();
+            return (200 <= responseCode && responseCode <= 399);
+        } catch (IOException e) {
+            return false;
+        }
     }
 }

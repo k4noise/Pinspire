@@ -41,6 +41,15 @@ public class GlobalAdvice extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 
+    @ExceptionHandler(FileStorageException.class)
+    public ResponseEntity<FileStorageResponse> handleFileStorageException(FileStorageException ex) {
+        FileStorageResponse errorResponse = new FileStorageResponse(
+                ex.getMessage(),
+                "An error occurred"
+        );
+        return new ResponseEntity<>(errorResponse, ex.getStatusCode());
+    }
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
                                                                   HttpHeaders headers,

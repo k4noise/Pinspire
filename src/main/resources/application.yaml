@@ -4,11 +4,11 @@ spring:
 
 app:
   backup:
-    dir: /backup
+    dir: backup
     job:
       cron: "0 0 * * 0"
   images:
-    dir: /images
+    dir: images
 
 management:
   endpoints:
