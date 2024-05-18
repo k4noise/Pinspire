@@ -1,5 +1,6 @@
 package com.k4noise.pinspire.domain;
 
+import com.k4noise.pinspire.adapter.web.dto.request.CommentRequestDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -26,4 +27,13 @@ public class CommentEntity {
     PinEntity pin;
 
     LocalDateTime createdAt;
+
+    public static CommentEntity create(CommentRequestDto commentDto, UserEntity user, PinEntity pin) {
+        CommentEntity comment = new CommentEntity();
+        comment.setText(commentDto.text());
+        comment.setUser(user);
+        comment.setPin(pin);
+        comment.setCreatedAt(LocalDateTime.now());
+        return comment;
+    }
 }

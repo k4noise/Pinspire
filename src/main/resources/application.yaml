@@ -1,3 +1,17 @@
 spring:
   profiles:
     active: dev
+
+app:
+  backup:
+    dir: backup
+    job:
+      cron: "0 0 * * 0"
+  images:
+    dir: images
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, entities-counter

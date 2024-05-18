@@ -1,5 +1,6 @@
 package com.k4noise.pinspire.domain;
 
+import com.k4noise.pinspire.adapter.web.dto.request.PinRequestDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -34,4 +35,15 @@ public class PinEntity {
 
     @OneToMany(mappedBy = "pin", cascade = CascadeType.ALL)
     List<LikeEntity> likes;
+
+    public static PinEntity create(PinRequestDto pinDto, UserEntity user, BoardEntity board) {
+        PinEntity pin = new PinEntity();
+        pin.setTitle(pinDto.title());
+        pin.setDescription(pinDto.description());
+        pin.setImageUrl(pinDto.imageUrl());
+        pin.setUploadedAt(LocalDateTime.now());
+        pin.setUser(user);
+        pin.setBoard(board);
+        return pin;
+    }
 }

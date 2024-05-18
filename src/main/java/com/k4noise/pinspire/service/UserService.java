@@ -1,7 +1,9 @@
 package com.k4noise.pinspire.service;
 
+import com.k4noise.pinspire.adapter.event.UserCreateEvent;
 import com.k4noise.pinspire.adapter.web.dto.request.UserRequestDto;
 import com.k4noise.pinspire.adapter.web.dto.response.UserResponseDto;
+import com.k4noise.pinspire.adapter.web.errors.FileStorageException;
 import com.k4noise.pinspire.domain.UserEntity;
 import com.k4noise.pinspire.adapter.repository.UserRepository;
 import com.k4noise.pinspire.service.mapper.UserMapper;
@@ -11,6 +13,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,22 +30,28 @@ import java.util.Optional;
 public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
+    FileStorageService fileService;
     PasswordEncoder encoder;
+    ApplicationEventPublisher eventPublisher;
 
+    @Transactional(readOnly = true)
     public boolean existsUserById(Long id) {
         return userRepository.existsById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<UserResponseDto> getAllUsers() {
         return userMapper.entitiesToResponse(userRepository.findAll());
     }
 
+    @Transactional(readOnly = true)
     public UserResponseDto getUserById(Long id) {
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
         return userMapper.entityToResponse(user);
     }
 
+    @Transactional(readOnly = true)
     public UserEntity getUserEntityByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with username: " + username));
@@ -59,6 +69,7 @@ public class UserService {
         String encodedPassword = encoder.encode(userDto.password());
         UserEntity newUser = UserEntity.create(userDto.username(), userDto.email(), encodedPassword);
         UserEntity savedUser = userRepository.save(newUser);
+        eventPublisher.publishEvent(new UserCreateEvent());
         log.info("Created user with id {} and username {}", savedUser.getId(), savedUser.getUsername());
         return userMapper.entityToResponse(savedUser);
     }
@@ -79,6 +90,20 @@ public class UserService {
         }
         user.setDisplayName(Optional.ofNullable(userDto.displayName()).orElse(user.getDisplayName()));
         return userMapper.entityToResponse(userRepository.save(user));
+    }
+
+    @Transactional
+    public void updateUserAvatar(UserDetails userDetails, String avatarUrl) throws FileStorageException {
+        UserEntity user = getUserEntityByUsername(userDetails.getUsername());
+        if (!fileService.isUrlValid(avatarUrl)) {
+            throw new FileStorageException("File URL is not valid: " + avatarUrl, HttpStatus.BAD_REQUEST);
+        }
+
+        if (!fileService.urlExists(avatarUrl)) {
+            throw new FileStorageException("File not exists with given URL: " + avatarUrl, HttpStatus.NOT_FOUND);
+        }
+
+        user.setAvatarUrl(avatarUrl);
     }
 
     @Transactional

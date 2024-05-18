@@ -21,4 +21,11 @@ public class LikeEntity {
     @ManyToOne
     @JoinColumn(name = "pin_id")
     PinEntity pin;
+
+    public static LikeEntity create(UserEntity user, PinEntity pin) {
+        LikeEntity like = new LikeEntity();
+        like.setUser(user);
+        like.setPin(pin);
+        return like;
+    }
 }
