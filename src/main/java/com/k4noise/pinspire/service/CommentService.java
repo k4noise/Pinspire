@@ -1,12 +1,14 @@
 package com.k4noise.pinspire.service;
 
 import com.k4noise.pinspire.adapter.web.dto.request.CommentRequestDto;
+import com.k4noise.pinspire.adapter.web.dto.request.NotificationRequestDto;
 import com.k4noise.pinspire.adapter.web.dto.response.CommentResponseDto;
 import com.k4noise.pinspire.domain.CommentEntity;
 import com.k4noise.pinspire.adapter.repository.CommentRepository;
 import com.k4noise.pinspire.domain.PinEntity;
 import com.k4noise.pinspire.domain.UserEntity;
 import com.k4noise.pinspire.service.mapper.CommentMapper;
+import com.k4noise.pinspire.service.notification.NotificationPublisherService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class CommentService {
     CommentRepository commentRepository;
     UserService userService;
     PinService pinService;
+    NotificationPublisherService notificationService;
     CommentMapper commentMapper;
 
     @Transactional(readOnly = true)
@@ -70,6 +73,10 @@ public class CommentService {
         comment.setUser(user);
         comment.setPin(pin);
         comment.setCreatedAt(LocalDateTime.now());
+        if (!Objects.equals(user.getUsername(), pin.getUser().getUsername())) {
+            NotificationRequestDto likeNotification = new NotificationRequestDto(pin.getUser().getUsername(), user.getUsername(), pin.getTitle(), pinId);
+            notificationService.sendLikeNotification(likeNotification);
+        }
         return commentMapper.entityToResponse(commentRepository.save(comment));
     }
 

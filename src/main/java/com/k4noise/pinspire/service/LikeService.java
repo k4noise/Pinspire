@@ -1,11 +1,13 @@
 package com.k4noise.pinspire.service;
 
+import com.k4noise.pinspire.adapter.web.dto.request.NotificationRequestDto;
 import com.k4noise.pinspire.adapter.web.dto.response.LikeResponseDto;
 import com.k4noise.pinspire.domain.LikeEntity;
 import com.k4noise.pinspire.adapter.repository.LikeRepository;
 import com.k4noise.pinspire.domain.PinEntity;
 import com.k4noise.pinspire.domain.UserEntity;
 import com.k4noise.pinspire.service.mapper.LikeMapper;
+import com.k4noise.pinspire.service.notification.NotificationPublisherService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class LikeService {
     LikeRepository likeRepository;
     UserService userService;
     PinService pinService;
+    NotificationPublisherService notificationService;
     LikeMapper likeMapper;
 
     @Transactional(readOnly = true)
@@ -61,6 +64,10 @@ public class LikeService {
         LikeEntity like = new LikeEntity();
         like.setUser(user);
         like.setPin(pin);
+        if (!Objects.equals(user.getUsername(), pin.getUser().getUsername())) {
+            NotificationRequestDto likeNotification = new NotificationRequestDto(pin.getUser().getUsername(), user.getUsername(), pin.getTitle(), pinId);
+            notificationService.sendLikeNotification(likeNotification);
+        }
         likeRepository.save(like);
     }
 
