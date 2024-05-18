@@ -17,7 +17,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -68,11 +67,7 @@ public class CommentService {
         PinEntity pin = pinService.getPinEntityById(pinId);
         UserEntity user = userService.getUserEntityByUsername(userDetails.getUsername());
 
-        CommentEntity comment = new CommentEntity();
-        comment.setText(commentDto.text());
-        comment.setUser(user);
-        comment.setPin(pin);
-        comment.setCreatedAt(LocalDateTime.now());
+        CommentEntity comment = CommentEntity.create(commentDto, user, pin);
         if (!Objects.equals(user.getUsername(), pin.getUser().getUsername())) {
             NotificationRequestDto likeNotification = new NotificationRequestDto(pin.getUser().getUsername(), user.getUsername(), pin.getTitle(), pinId);
             notificationService.sendLikeNotification(likeNotification);

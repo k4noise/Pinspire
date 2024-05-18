@@ -16,7 +16,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -56,16 +55,10 @@ public class BoardService {
     @Transactional
     @CounterMetric
     public BoardResponseDto createBoard(UserDetails userDetails, BoardRequestDto boardDto) {
-        BoardEntity board = new BoardEntity();
         UserEntity user = userService.getUserEntityByUsername(userDetails.getUsername());
-        board.setName(boardDto.name());
-        board.setDescription(boardDto.description());
-        board.setUser(user);
-        board.setPins(Collections.emptyList());
-
-        BoardEntity savedBoard = boardRepository.save(board);
+        BoardEntity board = boardRepository.save(BoardEntity.create(boardDto, user));
         log.info("Created board with id {}", board.getId());
-        return boardMapper.entityToResponse(savedBoard);
+        return boardMapper.entityToResponse(board);
     }
 
     @Transactional

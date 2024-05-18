@@ -19,11 +19,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -35,6 +30,7 @@ import java.util.Optional;
 public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
+    FileStorageService fileService;
     PasswordEncoder encoder;
     ApplicationEventPublisher eventPublisher;
 
@@ -99,11 +95,11 @@ public class UserService {
     @Transactional
     public void updateUserAvatar(UserDetails userDetails, String avatarUrl) throws FileStorageException {
         UserEntity user = getUserEntityByUsername(userDetails.getUsername());
-        if (!isUrlValid(avatarUrl)) {
+        if (!fileService.isUrlValid(avatarUrl)) {
             throw new FileStorageException("File URL is not valid: " + avatarUrl, HttpStatus.BAD_REQUEST);
         }
 
-        if (!urlExists(avatarUrl)) {
+        if (!fileService.urlExists(avatarUrl)) {
             throw new FileStorageException("File not exists with given URL: " + avatarUrl, HttpStatus.NOT_FOUND);
         }
 
@@ -115,27 +111,5 @@ public class UserService {
         UserEntity user = getUserEntityByUsername(userDetails.getUsername());
         userRepository.delete(user);
         log.info("Deleted user with id {}", user.getId());
-    }
-
-    private boolean isUrlValid(String urlString) {
-        try {
-            UriComponentsBuilder.fromHttpUrl(urlString).build().toUri();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private boolean urlExists(String urlString) {
-        try {
-            URL url = new URL(urlString);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("HEAD");
-            connection.connect();
-            int responseCode = connection.getResponseCode();
-            return (200 <= responseCode && responseCode <= 399);
-        } catch (IOException e) {
-            return false;
-        }
     }
 }

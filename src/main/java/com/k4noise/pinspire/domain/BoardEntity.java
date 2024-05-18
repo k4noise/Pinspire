@@ -1,9 +1,12 @@
 package com.k4noise.pinspire.domain;
 
+import com.k4noise.pinspire.adapter.web.dto.request.BoardRequestDto;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+
+import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -24,4 +27,13 @@ public class BoardEntity {
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
     List<PinEntity> pins;
+
+    public static BoardEntity create(BoardRequestDto boardDto, UserEntity user) {
+        BoardEntity board = new BoardEntity();
+        board.setName(boardDto.name());
+        board.setDescription(boardDto.description());
+        board.setUser(user);
+        board.setPins(Collections.emptyList());
+        return board;
+    }
 }

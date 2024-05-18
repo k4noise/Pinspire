@@ -2,6 +2,7 @@ package com.k4noise.pinspire.service;
 
 import com.k4noise.pinspire.adapter.web.dto.request.PinRequestDto;
 import com.k4noise.pinspire.adapter.web.dto.response.PinResponseDto;
+import com.k4noise.pinspire.adapter.web.errors.FileStorageException;
 import com.k4noise.pinspire.common.metrics.counter.CounterMetric;
 import com.k4noise.pinspire.domain.BoardEntity;
 import com.k4noise.pinspire.domain.PinEntity;
@@ -13,11 +14,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,6 +31,7 @@ public class PinService {
     PinMapper pinMapper;
     UserService userService;
     BoardService boardService;
+    FileStorageService fileService;
 
     @Transactional(readOnly = true)
     public boolean existsPinById(Long id) {
@@ -73,17 +75,17 @@ public class PinService {
             throw new AccessDeniedException("Action with another userDetails board is prohibited");
         }
 
-        PinEntity pin = new PinEntity();
-        pin.setTitle(pinDto.title());
-        pin.setDescription(pinDto.description());
-        pin.setImageUrl(pinDto.imageUrl());
-        pin.setUploadedAt(LocalDateTime.now());
-        pin.setUser(user);
-        pin.setBoard(board);
+        if (!fileService.isUrlValid(pinDto.imageUrl())) {
+            throw new FileStorageException("File URL is not valid: " + pinDto.imageUrl(), HttpStatus.BAD_REQUEST);
+        }
 
-        PinEntity savedPin = pinRepository.save(pin);
+        if (!fileService.urlExists(pinDto.imageUrl())) {
+            throw new FileStorageException("File not exists with given URL: " + pinDto.imageUrl(), HttpStatus.NOT_FOUND);
+        }
+
+        PinEntity pin = pinRepository.save(PinEntity.create(pinDto, user, board));
         log.info("Created pin with id {}", pin.getId());
-        return pinMapper.entityToResponse(savedPin);
+        return pinMapper.entityToResponse(pin);
     }
 
     @Transactional

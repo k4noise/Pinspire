@@ -61,9 +61,7 @@ public class LikeService {
         PinEntity pin = pinService.getPinEntityById(pinId);
         UserEntity user = userService.getUserEntityByUsername(userDetails.getUsername());
 
-        LikeEntity like = new LikeEntity();
-        like.setUser(user);
-        like.setPin(pin);
+        LikeEntity like = LikeEntity.create(user, pin);
         if (!Objects.equals(user.getUsername(), pin.getUser().getUsername())) {
             NotificationRequestDto likeNotification = new NotificationRequestDto(pin.getUser().getUsername(), user.getUsername(), pin.getTitle(), pinId);
             notificationService.sendLikeNotification(likeNotification);

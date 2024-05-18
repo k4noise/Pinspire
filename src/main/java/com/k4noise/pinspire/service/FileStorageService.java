@@ -11,8 +11,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,6 +35,28 @@ public class FileStorageService {
             Files.createDirectories(this.fileStorageLocation);
         } catch (Exception exception) {
             throw new FileStorageException("Could not create file", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public static boolean isUrlValid(String urlString) {
+        try {
+            UriComponentsBuilder.fromHttpUrl(urlString).build().toUri();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static boolean urlExists(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("HEAD");
+            connection.connect();
+            int responseCode = connection.getResponseCode();
+            return (200 <= responseCode && responseCode <= 399);
+        } catch (IOException e) {
+            return false;
         }
     }
 
